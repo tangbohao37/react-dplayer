@@ -16,6 +16,8 @@
     "@types/dplayer": "^1.25.0",
     "clsx": "^1.1.0",
     "dplayer": "^1.26.0",
+    "flv.js": "^1.5.0",
+    "hls.js": "^1.0.3",
     "omit.js": "^2.0.2"
   },
   "devDependencies": {
@@ -42,7 +44,7 @@
     "react": "^16.x"
   },
   "scripts": {
-    "dev-server": "webpack-dev-server --config ./example/example.config",
+    "dev-server": "webpack serve --config ./example/example.config.js",
     "start": "npm run compile && npm run dev-server",
     "prepublish": "npm run prepublish:cjs && npm run prepublish:esm",
     "prepublish:esm": "babel ./src --out-dir ./es --config-file ./babelrc/esm/.babelrc",

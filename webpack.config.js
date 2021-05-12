@@ -77,7 +77,7 @@ All rights reserved.`,
   ],
 };
 
-const createWebpackConfig = function (config) {
+const createWebpackConfig = function(config) {
   return merge(baseWebpackConfig, config);
 };
 
