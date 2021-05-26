@@ -28,9 +28,14 @@ const baseWebpackConfig = {
   devtool: '#sourcemap',
   resolve: {
     modules: ['node_modules'],
-    extensions: ['.js', '.jsx', '.json'],
+    extensions: ['js', 'jsx', '.json', 'ts', 'tsx'],
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+      types: path.resolve(__dirname, 'types'),
+    },
   },
   optimization: {
+    emitOnErrors: true,
     splitChunks: {
       cacheGroups: {
         styles: {
@@ -66,8 +71,7 @@ const baseWebpackConfig = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
-    new webpack.optimize.OccurrenceOrderPlugin(),
-    new webpack.NoEmitOnErrorsPlugin(),
+    // new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.BannerPlugin(
       `${pkg.name} v${pkg.version}
 

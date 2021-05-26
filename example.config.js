@@ -2,13 +2,21 @@ const path = require('path');
 const rootPath = process.cwd();
 const srcPath = path.resolve(rootPath, 'example');
 const webpack = require('webpack');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
   entry: {
-    bundle: [path.resolve(srcPath, 'example.js')],
+    bundle: [path.resolve(srcPath, './example.tsx')],
+  },
+  target: ['web'],
+  resolve: {
+    extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      assets: path.resolve(__dirname, './example/assets'),
+      types: path.resolve(__dirname, './types'),
+    },
   },
   devServer: {
     open: true,
@@ -43,19 +51,20 @@ module.exports = {
   },
   devtool: 'cheap-source-map',
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: path.resolve(srcPath, 'index.html'),
     }),
-    new MiniCssExtractPlugin({
-      filename: '[name].css',
-    }),
   ],
+  stats: { errorDetails: true },
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.svg$/,
+        use: ['@svgr/webpack'],
+      },
+      {
+        test: /\.(j|t)sx?$/,
         exclude: [/node_modules/],
         use: [
           {
@@ -67,8 +76,18 @@ module.exports = {
         ],
       },
       {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        test: /\.module\.less$/,
+        use: [
+          'style-loader',
+          '@teamsupercell/typings-for-css-modules-loader',
+          'css-loader',
+          {
+            loader: 'less-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
       },
     ],
   },
