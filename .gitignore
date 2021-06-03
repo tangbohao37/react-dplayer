@@ -64,3 +64,4 @@ dist
 
 #idea
 .idea
+.DS_Store

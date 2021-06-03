@@ -22,7 +22,7 @@ export const LiveComment = () => {
         commentRef={CommentFun}
         playGasketOnDisconnect={true}
       >
-        <BottomArea></BottomArea>
+        {/* <BottomArea></BottomArea> */}
       </DPlayer>
     </div>
   );

@@ -63,6 +63,7 @@
     "react": "^17.x"
   },
   "scripts": {
+    "build": "webpack --config ./build.config.js",
     "dev-server": "webpack serve --config ./example.config.js",
     "start": "npm run compile && npm run dev-server",
     "prepublish": "npm run prepublish:cjs && npm run prepublish:esm",

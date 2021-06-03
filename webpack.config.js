@@ -6,7 +6,6 @@ const libraryName = 'ReactDPlayer';
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const baseWebpackConfig = {
   output: {
@@ -74,7 +73,6 @@ const baseWebpackConfig = {
     // new webpack.optimize.OccurrenceOrderPlugin(),
     new webpack.BannerPlugin(
       `${pkg.name} v${pkg.version}
-
 Copyright 2017-present, MoePlayer, Inc.
 All rights reserved.`,
     ),
@@ -89,19 +87,6 @@ const minWebpackConfig = createWebpackConfig({
   mode: 'production',
   entry: {
     [`${pkg.name}.min`]: path.resolve(srcPath, 'index.js'),
-  },
-  optimization: {
-    minimizer: [
-      new UglifyJsPlugin({
-        uglifyOptions: {
-          warnings: false,
-          output: {
-            ascii_only: true,
-          },
-        },
-        sourceMap: true,
-      }),
-    ],
   },
   plugins: [
     new webpack.DefinePlugin({
