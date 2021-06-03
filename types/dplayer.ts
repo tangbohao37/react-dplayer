@@ -29,13 +29,16 @@ export interface DPlayerOptions {
   lang?: Lang | string;
   screenshot?: boolean;
   hotkey?: boolean;
+  onStreamErrorInterval: boolean;
+  onStreamEndInterval: boolean;
+  timeout: number;
   preload?: Preload;
   logo?: string;
   volume?: number;
   mutex?: boolean;
   video?: DPlayerVideo;
   subtitle?: DPlayerSubTitle;
-  danmaku?: DPlayerDanmaku;
+  danmaku?: DPlayerDanmaku | boolean;
   contextmenu?: DPlayerContextMenuItem[];
   highlight?: DPlayerHighLightItem[];
   apiBackend?: DPlayerAPIBackend;
@@ -115,7 +118,7 @@ export interface DPlayerVideoQuality {
 }
 
 export interface DPlayerVideo {
-  url: string;
+  url?: string;
   pic?: string;
   thumbnails?: string;
   type?: VideoType | string;
@@ -191,7 +194,7 @@ export default interface DPlayer {
 
   on(event: DPlayerEvents, handler: () => void): void;
 
-  switchVideo(video: DPlayerVideo, danmaku: DPlayerDanmaku): void;
+  switchVideo(video: DPlayerVideo, danmaku?: DPlayerDanmaku): void;
 
   notice(text: string, time: number, opacity: number): void;
 

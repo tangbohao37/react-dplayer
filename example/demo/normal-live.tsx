@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 // import DPlayer from '../lib';
-import DPlayer from '@/dplayer';
+import DPlayer from '@/index';
 import DplayerInstance from 'types/dplayer';
 import flvjs from 'flv.js';
 import Hls from 'hls.js';

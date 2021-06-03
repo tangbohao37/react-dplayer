@@ -1,119 +1,135 @@
-import React, {
+import {
   Children,
   cloneElement,
   FC,
-  ForwardedRef,
-  ReactNode,
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
 import clsx from 'clsx';
-import omit from 'omit.js';
-import DPlayer from 'dplayer';
+import DPlayer from '@wii-fe/dplayer';
+import { useRoomDetail } from '@/context/room-detail';
 import DPlayerInstance, {
   DPlayerDanmakuItem,
   DPlayerEvents,
-  DPlayerOptions,
 } from 'types/dplayer';
+import { IProps } from 'types/props';
 import { render } from 'react-dom';
-
-export interface ICommentRefProps {
-  draw: (dan: Partial<DPlayerDanmakuItem>) => void;
-  isFullScreen: boolean;
-}
-
-interface IProps {
-  dpRef?: ForwardedRef<DPlayerInstance>;
-  options: DPlayerOptions;
-  commentRef?: (props: ICommentRefProps) => ReactNode | ''; // TODO： 类型？
-  onLoad: (dp: DPlayerInstance) => void;
-  onDisconnect: () => void;
-  onReconnect: () => void;
-  onConnected: () => void;
-  [k: string]: any;
-}
+import useOptions from './hooks/useOptions';
+import { LiveRoomRespDto } from 'types/live';
 
 const DPlayerComponent: FC<IProps> = (props) => {
   const containerRef = useRef<HTMLElement>(null);
-  const dp = useRef<DPlayerInstance>();
-  const { className, options, commentRef, bottomArea, ...otherProps } = props;
+  const [dp, setDp] = useState<DPlayerInstance>();
+  const { className, ...restPops } = props;
   const [isRender, setIsRender] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const roomDetail = useRoomDetail();
 
-  const resetProps = omit(otherProps, [
-    'options',
-    'dpRef',
-    'onDisconnect',
-    'onReconnect',
-    'onConnected',
-    // ...eventsProps.map(ev => ev.prop),
-  ]);
+  const {
+    dpOptions,
+    containerOptions,
+    commentRef,
+    loading,
+    setShowIsNotStart,
+  } = useOptions(
+    roomDetail as LiveRoomRespDto,
+    containerRef.current as HTMLElement,
+    restPops,
+  );
 
-  const wrapperClassName = clsx({
-    [`dplayer`]: true,
-    [`${className}`]: !!className,
-  });
+  const wrapperClassName = useMemo(() => {
+    return clsx({
+      [`dplayer`]: true,
+      [`${className}`]: !!className,
+    });
+  }, [className]);
 
   useLayoutEffect(() => {
-    options.container = containerRef.current;
-    // dplayer实例 Ref
-    dp.current = new DPlayer(options);
-    props.onLoad(dp.current as DPlayerInstance);
-    setIsRender(true);
-  }, [options, props]);
+    if (dpOptions) {
+      setDp(new DPlayer(dpOptions));
+      setIsRender(true);
+    }
+  }, [dpOptions]);
 
+  // 注册事件
   useEffect(() => {
-    if (dp.current) {
-      // 注册事件
-      dp.current.on(DPlayerEvents.disconnect, props.onDisconnect);
-      dp.current.on(DPlayerEvents.connected, props.onConnected);
-      dp.current.on(DPlayerEvents.reconnect, props.onReconnect);
-      dp.current.on(DPlayerEvents.fullscreen_cancel, () => {
+    if (dp && roomDetail) {
+      props.onLoad && props.onLoad(dp as DPlayerInstance);
+      dp.on(DPlayerEvents.disconnect, () => {
+        if (props.playGasketOnDisconnect) {
+          if (roomDetail.liveGasketVideoUrl) {
+            dp.switchVideo({
+              pic: roomDetail.liveGasketVideoPicture,
+              url: roomDetail.liveGasketVideoUrl as string,
+            });
+          } else {
+            setShowIsNotStart(true);
+          }
+        }
+        props.onDisconnect && props.onDisconnect();
+      });
+      dp.on(DPlayerEvents.connected, () => {
+        console.log('连接成功');
+        props.onConnected && props.onConnected();
+      });
+      dp.on(DPlayerEvents.reconnect, () => {
+        console.log('重新连接成功');
+        props.onReconnect && props.onReconnect();
+      });
+      dp.on(DPlayerEvents.fullscreen_cancel, () => {
         setIsFullScreen(false);
         props.onFullscreenCancel && props.onFullscreenCancel();
       });
-      dp.current.on(DPlayerEvents.fullscreen, () => {
+      dp.on(DPlayerEvents.fullscreen, () => {
         setIsFullScreen(true);
         props.onFullscreen && props.onFullscreen();
       });
     }
-  }, [props]);
+  }, [dp, props, roomDetail, setShowIsNotStart]);
 
-  const draw = useCallback((danItem: DPlayerDanmakuItem) => {
-    const defaultDan = { text: '', color: '#fff', type: 'top' };
-    if (dp.current?.danmaku) {
-      dp.current?.danmaku.draw({ ...defaultDan, ...danItem });
-    }
-  }, []);
+  const draw = useCallback(
+    (danItem: DPlayerDanmakuItem) => {
+      const defaultDan = { text: '', color: '#fff', type: 'top' };
+      if (dp?.danmaku) {
+        dp?.danmaku.draw({ ...defaultDan, ...danItem });
+      }
+    },
+    [dp?.danmaku],
+  );
 
   useEffect(() => {
-    if (isRender && props.commentRef && containerRef.current) {
+    if (isRender && commentRef && containerRef.current) {
       const commentEl = containerRef.current?.querySelector(
         '.dplayer-inner-comment-box',
       );
-      const Component = props.commentRef;
+      const Component = commentRef;
       render(<Component draw={draw} isFullScreen={isFullScreen} />, commentEl);
     }
-  }, [draw, isFullScreen, isRender, props.commentRef]);
+  }, [draw, isFullScreen, isRender, commentRef]);
 
-  const childrenWithProps = Children.map(props.children, (child) => {
-    if (child) {
-      return cloneElement(child, {
-        draw: draw,
-        isFullScreen: isFullScreen,
-      });
-    }
-  });
+  const childrenWithProps = useMemo(
+    () =>
+      Children.map(props.children, (child) => {
+        if (child) {
+          return cloneElement(child, {
+            draw: draw,
+            isFullScreen: isFullScreen,
+          });
+        }
+      }),
+    [draw, isFullScreen, props.children],
+  );
 
   return (
     <>
       <div
         ref={containerRef}
         className={wrapperClassName}
-        {...resetProps}
+        {...containerOptions}
       ></div>
       {childrenWithProps}
     </>

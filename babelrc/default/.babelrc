@@ -1,8 +1,14 @@
 {
   "presets": [
     "@babel/preset-env",
-    "@babel/preset-react",
+    [
+      // react 17 不用引入react
+      "@babel/preset-react",
+      {
+        "runtime": "automatic"
+      }
+    ],
     "@babel/preset-typescript"
   ],
-  "plugins": []
+  "plugins": ["@babel/plugin-transform-runtime"]
 }

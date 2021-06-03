@@ -3,7 +3,7 @@ import Pallette from 'assets/pallette.svg';
 import cls from 'clsx';
 import style from './style.module.less';
 import { DirectionType } from 'types/dplayer';
-import { ICommentRefProps } from '@/dplayer';
+import { ICommentRefProps } from '@/index';
 
 export const CommentFun = (props: ICommentRefProps) => {
   return props.isFullScreen ? <Comment {...props} /> : '';

@@ -26,6 +26,9 @@ module.exports = {
     historyApiFallback: true,
     hot: true,
     port: 8080,
+    proxy: {
+      '/oss': 'http://tactivity-live.wiiqq.com/server/activity-live/',
+    },
     publicPath: '',
     noInfo: true,
     quiet: false,
