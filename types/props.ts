@@ -16,6 +16,7 @@ export interface IProps {
   commentRef?: (props: ICommentRefProps) => ReactNode | ''; // TODO： 类型？
   onLoad?: (dp: DPlayerInstance) => void;
   onNotBeginPic: any;
+  onEndPic: any;
   onDisconnect?: () => void;
   playGasketOnDisconnect?: boolean;
   roomID: string;

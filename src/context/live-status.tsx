@@ -35,6 +35,14 @@ const LiveStatusProvider: FC<{ onNotBeginPic: any }> = ({
               <img src={onNotBeginPic} style={imgStyle} alt="精彩即将开始" />
             );
           }
+        case LiveStatus.OVER:
+          if (!roomDetail.liveGasketVideoUrl) {
+            <img
+              src={onEndPic}
+              style={imgStyle}
+              alt="直播已经结束，等待上传回放"
+            />;
+          }
         default:
           return children;
       }
